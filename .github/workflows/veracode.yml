@@ -23,8 +23,9 @@ jobs:
 
       # Veracode Static Analysis
       - name: Veracode Static Analysis
-        uses: veracode/veracode-static-analysis-action@master
+        uses: veracode/scan@v2.1.9
         with:
+          type: "static"
           appname: "${{ github.repository }}"
           createprofile: true
           vid: "${{ secrets.VERACODE_API_ID }}"
