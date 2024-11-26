@@ -1,35 +1,49 @@
-name: "Veracode Static Analysis"
-
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the main branch
+veracode_static_scan:
   push:
-    branches: ["*"]
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+    trigger: true
+    # Specify either branches_to_run or branches_to_exclude, not both
+    branches_to_run:
+      - "*"
+    branches_to_exclude: []
+  pull_request:
+    trigger: false
+    action:
+      - opened
+      - synchronize
+    target_branch:
+      - default_branch
+  # If analysis_on_platform is true, Veracode saves the last scan result on the default branch
+  analysis_on_platform: false
+  # Build will break if findings violate the policy
+  break_build_policy_findings: true
+  # Build will break if the policy name is invalid
+  break_build_invalid_policy: true
+  # Build will not break if the scan fails or errors
+  break_build_on_error: false
+  error_message: "Veracode static scan faced a problem. Please contact your Veracode administrator for more information."
+  # Default policy used if no policy is assigned to the application profile
+  policy: "Veracode Recommended Medium + SCA"
+  # GitHub security code scanning alerts for static findings
+  create_code_scanning_alert: false
+  # GitHub Issues will not be created for static findings
+  create_issue: false
+  issues:
+    trigger: false
+    commands:
+      - "Veracode Static Scan"
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  # This workflow contains a job called "static_analysis"
-  static_analysis:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+ruby:
+  version: 3.2.2
+  bundle: 2.4.6
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE
-      - name: Checkout code
-        uses: actions/checkout@v3
+veracode_static_scan_build:
+  runs_on: default
+  packager_image: veracode/scm-packaging:3.0.0
+  predependency_command: |
+    apt-get install -y vim
 
-      # Veracode Static Analysis
-      - name: Veracode Static Analysis
-        uses: veracode/scan@v2.1.9
-        with:
-          type: "static"
-          appname: "${{ github.repository }}"
-          createprofile: true
-          vid: "${{ secrets.VERACODE_API_ID }}"
-          vkey: "${{ secrets.VERACODE_API_KEY }}"
-          scantimeout: 15
-          failbuild: true
-          policy: "Veracode Recommended Medium + SCA"
+veracode_sca_scan_build:
+  runs_on: default
+  packager_image: default
+  predependency_command: |
+    # Add any predependency commands here
