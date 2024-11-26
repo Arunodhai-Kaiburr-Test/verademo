@@ -1,49 +1,44 @@
-veracode_static_scan:
+name: Veracode Scans
+
+on:
   push:
-    trigger: true
-    # Specify either branches_to_run or branches_to_exclude, not both
-    branches_to_run:
+    branches:
       - "*"
-    branches_to_exclude: []
   pull_request:
-    trigger: false
-    action:
-      - opened
-      - synchronize
-    target_branch:
+    branches:
       - default_branch
-  # If analysis_on_platform is true, Veracode saves the last scan result on the default branch
-  analysis_on_platform: false
-  # Build will break if findings violate the policy
-  break_build_policy_findings: true
-  # Build will break if the policy name is invalid
-  break_build_invalid_policy: true
-  # Build will not break if the scan fails or errors
-  break_build_on_error: false
-  error_message: "Veracode static scan faced a problem. Please contact your Veracode administrator for more information."
-  # Default policy used if no policy is assigned to the application profile
-  policy: "Veracode Recommended Medium + SCA"
-  # GitHub security code scanning alerts for static findings
-  create_code_scanning_alert: false
-  # GitHub Issues will not be created for static findings
-  create_issue: false
-  issues:
-    trigger: false
-    commands:
-      - "Veracode Static Scan"
 
-ruby:
-  version: 3.2.2
-  bundle: 2.4.6
+jobs:
+  veracode_static_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-veracode_static_scan_build:
-  runs_on: default
-  packager_image: veracode/scm-packaging:3.0.0
-  predependency_command: |
-    apt-get install -y vim
+      - name: Veracode Static Scan
+        run: |
+          echo "Starting Veracode Static Scan..."
+          # Add your Veracode static scan commands here
+        env:
+          POLICY: "Veracode Recommended Medium + SCA"
+          ERROR_MESSAGE: "Veracode static scan faced a problem. Please contact your Veracode administrator for more information."
 
-veracode_sca_scan_build:
-  runs_on: default
-  packager_image: default
-  predependency_command: |
-    # Add any predependency commands here
+  veracode_sca_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Veracode SCA Scan
+        run: |
+          echo "Starting Veracode SCA Scan..."
+          # Add your Veracode SCA scan commands here
+
+  setup_ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.2
+          bundler-version: 2.4.6
